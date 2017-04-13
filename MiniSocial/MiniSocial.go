@@ -20,30 +20,21 @@ var (
 )
 
 func main() {
-	fmt.Scan(&n)
+	fmt.Scanf("%d", &n)
 
 	for i := 0; i < n; i++ {
-		fmt.Scan(&a[i])
-		if (i > 0 && (i == 1 || i == n-1) && a[i] == a[i-1]) || (i > 2 && a[i] == a[i-1] && a[i-1] == a[i-2]) {
-			i--
-			n--
-		}
+		fmt.Scanf("%d", &a[i])
 	}
 
 	f[0] = 0
 	f[1] = GetDifferent(a[0], a[1])
-	for i := 2; i < n; i++ {
-		if a[i] == a[i-1] {
-			f[i] = f[i-1]
-			i++
-			f[i] = f[i-2] + GetDifferent(a[i], a[i-1])
-			continue
-		}
 
+	for i := 2; i < n; i++ {
+		dif := GetDifferent(a[i], a[i-1])
 		if (a[i]-a[i-1])*(a[i-1]-a[i-2]) < 0 {
-			f[i] = int64(math.Max(float64(f[i-2]+GetDifferent(a[i], a[i-1])), float64(f[i-1])))
+			f[i] = int64(math.Max(float64(f[i-2]+dif), float64(f[i-1])))
 		} else {
-			f[i] = f[i-1] + GetDifferent(a[i], a[i-1])
+			f[i] = f[i-1] + dif
 		}
 	}
 
