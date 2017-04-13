@@ -7,27 +7,32 @@ const (
 	maxx  = 1000000000
 )
 
-var n, m int
-var s [maxnm + 1]int
-var f [maxnm + 1]int
+var (
+	n, m int
+	s, f [maxnm + 2]int
+)
 
 func main() {
 
 	//read data
 	fmt.Scanln(&n, &m)
 
-	for i := 0; i < n; i++ {
-		var ele int
-		fmt.Scanln(&ele)
+	for i := 1; i <= n; i++ {
+		var (
+			ele     int
+			useLess float64
+		)
+		fmt.Scanln(&ele, &useLess)
 		s[i] = ele
 	}
 
 	//quy hoach dong
-	s[n] = maxx + 1
-	f[n] = 1
-	for i := n - 1; i >= 0; i-- {
+	s[n+1] = maxx + 1
+	s[0] = 0
+	f[n+1] = 1
+	for i := n; i >= 0; i-- {
 		var max = 0
-		for j := i + 1; j <= n; j++ {
+		for j := i + 1; j <= n+1; j++ {
 			if s[j] >= s[i] && f[j] > max {
 				max = f[j]
 			}
@@ -35,12 +40,5 @@ func main() {
 		f[i] = max + 1
 	}
 
-	var result int
-	for i := 0; i < n; i++ {
-		if result < f[i] {
-			result = f[i]
-		}
-	}
-
-	fmt.Print(n - result + 1)
+	fmt.Print(n - (f[0] - 2))
 }
