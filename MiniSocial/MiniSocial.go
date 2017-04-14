@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -21,9 +25,17 @@ var (
 
 func main() {
 	fmt.Scanf("%d", &n)
+	in := bufio.NewReader(os.Stdin)
 
+	ss, _ := in.ReadString('\n')
+	ls := strings.Split(ss, " ")
+	var last string
+	for i := 0; i < len(ls[n-1])-1; i++ {
+		last += string(ls[n-1][i])
+	}
+	ls[n-1] = last
 	for i := 0; i < n; i++ {
-		fmt.Scanf("%d", &a[i])
+		a[i], _ = strconv.Atoi(ls[i])
 	}
 
 	f[0] = 0
