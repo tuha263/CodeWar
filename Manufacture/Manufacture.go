@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math"
-	"os"
-	"strconv"
-	"strings"
 )
 
 //Ring is info of ring
@@ -37,7 +33,7 @@ var (
 func main() {
 	fmt.Scan(&n)
 
-	in := bufio.NewReader(os.Stdin)
+	/*in := bufio.NewReader(os.Stdin)
 
 	ss, _ := in.ReadString('.')
 
@@ -48,24 +44,41 @@ func main() {
 		b, _ := strconv.Atoi(abh[1])
 		h, _ := strconv.Atoi(abh[2])
 		ring[i] = Ring{a, b, h}
+	}*/
+	for i := 0; i < n; i++ {
+		fmt.Scan(&ring[i].a, &ring[i].b, &ring[i].h)
 	}
 
 	QuickSort(0, n-1)
-	Discrete()
+	//Discrete()
+
+	/*	for i := 0; i < n; i++ {
+			f[i] = GetMAX(ring[i].b-1) + int64(ring[i].h)
+			UpdateBIT(ring[i].a, f[i])
+		}
+
+		fmt.Println(GetMAX(n * 2))*/
+
 	ring[n] = Ring{0, MAXX + 1, 0}
 
 	f[0] = int64(ring[0].h)
 	for i := 0; i <= n; i++ {
-		f[i] = GetMAX(ring[i].b-1) + int64(ring[i].h)
-		UpdateBIT(ring[i].b, f[i])
+		var max int64
+		for j := 0; j < i; j++ {
+			if ring[i].b > ring[j].a && max < f[j] {
+				max = f[j]
+			}
+			f[i] = max + int64(ring[i].h)
+		}
 	}
 
 	fmt.Println(f[n])
+
 }
 
 // UpdateBIT update BIT
 func UpdateBIT(i int, value int64) {
-	if i <= n*2 {
+	if i <= n*2+1 {
 		f[i] = int64(math.Max(float64(value), float64(f[i])))
 		UpdateBIT(i+i&(-i), value)
 	}
@@ -73,7 +86,7 @@ func UpdateBIT(i int, value int64) {
 
 // GetMAX get max form 0..i
 func GetMAX(i int) int64 {
-	fmt.Println(i)
+	//fmt.Println(i)
 	if i == 0 {
 		return 0
 	}
@@ -104,14 +117,13 @@ func QuickSort(left, right int) {
 			l++
 			r--
 		}
+	}
+	if left < r {
+		QuickSort(left, r)
+	}
 
-		if left < r {
-			QuickSort(left, r)
-		}
-
-		if right > l {
-			QuickSort(l, right)
-		}
+	if right > l {
+		QuickSort(l, right)
 	}
 }
 
@@ -126,6 +138,10 @@ func Discrete() {
 	}
 
 	QuickSortPoint(0, n*2-1)
+
+	/*for i := 0; i < n*2; i++ {
+		fmt.Println(*pointer[i].value)
+	}*/
 
 	for i := 0; i < n*2; i++ {
 		*pointer[i].value = i + 1
@@ -148,6 +164,9 @@ func QuickSortPoint(left, right int) {
 		}
 
 		if l <= r {
+			/*fmt.Print(l)
+			fmt.Print("-")
+			fmt.Println(r)*/
 			temp := pointer[l]
 			pointer[l] = pointer[r]
 			pointer[r] = temp
