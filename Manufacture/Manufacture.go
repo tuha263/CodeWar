@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math"
+	"os"
+	"strconv"
+	"strings"
 )
 
 //Ring is info of ring
@@ -26,14 +30,14 @@ const (
 var (
 	n, maxab int
 	ring     [MAXN + 1]Ring
-	f        [MAXN + 1]int64
+	f        [MAXN*2 + 1]int64
 	pointer  [MAXN*2 + 2]RingPoiter
 )
 
 func main() {
 	fmt.Scan(&n)
 
-	/*in := bufio.NewReader(os.Stdin)
+	in := bufio.NewReader(os.Stdin)
 
 	ss, _ := in.ReadString('.')
 
@@ -44,55 +48,34 @@ func main() {
 		b, _ := strconv.Atoi(abh[1])
 		h, _ := strconv.Atoi(abh[2])
 		ring[i] = Ring{a, b, h}
-	}*/
-	for i := 0; i < n; i++ {
-		fmt.Scan(&ring[i].a, &ring[i].b, &ring[i].h)
 	}
 
+	Discrete()
 	QuickSort(0, n-1)
-	//Discrete()
 
-	/*	for i := 0; i < n; i++ {
-			f[i] = GetMAX(ring[i].b-1) + int64(ring[i].h)
-			UpdateBIT(ring[i].a, f[i])
-		}
-
-		fmt.Println(GetMAX(n * 2))*/
-
-	ring[n] = Ring{0, MAXX + 1, 0}
-
-	f[0] = int64(ring[0].h)
-	for i := 0; i <= n; i++ {
-		var max int64
-		for j := 0; j < i; j++ {
-			if ring[i].b > ring[j].a && max < f[j] {
-				max = f[j]
-			}
-			f[i] = max + int64(ring[i].h)
-		}
+	for i := 0; i < n; i++ {
+		f[ring[i].a] = GetMAX(ring[i].b-1) + int64(ring[i].h)
+		UpdateBIT(ring[i].a, f[ring[i].a])
 	}
 
-	fmt.Println(f[n])
-
+	fmt.Println(GetMAX(maxab))
 }
 
 // UpdateBIT update BIT
 func UpdateBIT(i int, value int64) {
-	if i <= n*2+1 {
+	i += i & -i
+	if i <= maxab {
 		f[i] = int64(math.Max(float64(value), float64(f[i])))
-		UpdateBIT(i+i&(-i), value)
+		UpdateBIT(i, value)
 	}
 }
 
 // GetMAX get max form 0..i
 func GetMAX(i int) int64 {
-	//fmt.Println(i)
 	if i == 0 {
 		return 0
 	}
-	if i-i&(-i) == 0 {
-		return f[i]
-	}
+
 	return int64(math.Max(float64(f[i]), float64(GetMAX(i-i&(-i)))))
 }
 
@@ -100,13 +83,13 @@ func GetMAX(i int) int64 {
 func QuickSort(left, right int) {
 	l := left
 	r := right
-	pivot := ring[(left+right)/2].b
-	for l < r {
-		for ring[l].b > pivot {
+	pivot := ring[(left+right)/2]
+	for l <= r {
+		for ring[l].b > pivot.b || (ring[l].b == pivot.b && ring[l].a > pivot.a) {
 			l++
 		}
 
-		for ring[r].b < pivot {
+		for ring[r].b < pivot.b || (ring[r].b == pivot.b && ring[r].a < pivot.a) {
 			r--
 		}
 
@@ -118,6 +101,7 @@ func QuickSort(left, right int) {
 			r--
 		}
 	}
+
 	if left < r {
 		QuickSort(left, r)
 	}
@@ -125,11 +109,12 @@ func QuickSort(left, right int) {
 	if right > l {
 		QuickSort(l, right)
 	}
+
 }
 
 //Discrete discrete a and b of ring
 func Discrete() {
-	for i := 0; i < n*2; i++ {
+	for i := 0; i < n; i++ {
 		pointer[i*2].pointer = &ring[i]
 		pointer[i*2].value = &ring[i].a
 
@@ -139,12 +124,14 @@ func Discrete() {
 
 	QuickSortPoint(0, n*2-1)
 
-	/*for i := 0; i < n*2; i++ {
-		fmt.Println(*pointer[i].value)
-	}*/
-
+	curValue := *pointer[0].value
+	maxab = 1
 	for i := 0; i < n*2; i++ {
-		*pointer[i].value = i + 1
+		if *pointer[i].value != curValue {
+			maxab++
+			curValue = *pointer[i].value
+		}
+		*pointer[i].value = maxab
 	}
 }
 
@@ -155,32 +142,29 @@ func QuickSortPoint(left, right int) {
 	m := (left + right) / 2
 	pivot := *pointer[m].value
 	for l < r {
-		for *pointer[l].value < pivot || (*pointer[l].value == pivot && l%2 == 1 && m%2 == 0) {
+		for *pointer[l].value < pivot {
 			l++
 		}
 
-		for *pointer[r].value > pivot || (*pointer[r].value == pivot && r%2 == 0 && m%2 == 1) {
+		for *pointer[r].value > pivot {
 			r--
 		}
 
 		if l <= r {
-			/*fmt.Print(l)
-			fmt.Print("-")
-			fmt.Println(r)*/
 			temp := pointer[l]
 			pointer[l] = pointer[r]
 			pointer[r] = temp
 			l++
 			r--
 		}
+	}
 
-		if left < r {
-			QuickSortPoint(left, r)
-		}
+	if left < r {
+		QuickSortPoint(left, r)
+	}
 
-		if right > l {
-			QuickSortPoint(l, right)
-		}
+	if right > l {
+		QuickSortPoint(l, right)
 	}
 
 }
