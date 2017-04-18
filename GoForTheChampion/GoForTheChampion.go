@@ -22,8 +22,9 @@ const (
 )
 
 var (
-	team   [4]Team
-	result int
+	team       [4]Team
+	goalResult int
+	loseResult int
 )
 
 func main() {
@@ -32,7 +33,7 @@ func main() {
 		indexOfVN int
 	)
 	team[FindByName(VN, &indexOfVN)].score += 3
-	ShortTeams()
+	SortTeams()
 
 	indexOfVN = FindByName(VN, &indexOfVN)
 	team2dn := &team[1]
@@ -46,61 +47,59 @@ func main() {
 		os.Exit(0)
 	}
 
-	for FindByName(VN, &indexOfVN) > 1 {
-		AddGoal()
-	}
-
-	fmt.Println(strconv.Itoa(result) + ":0")
+	fmt.Println(GetResult())
 }
 
-// AddGoal add gold to teams
-func AddGoal() {
+//GetResult return result
+func GetResult() string {
+	for i := 1; i < 10; i++ {
+		if Try(i, 0) {
+			for j := i; j < 10; j++ {
+				if Try(j, j-(i-1)) {
+					return strconv.Itoa(j) + ":" + strconv.Itoa(j-(i-1))
+				}
+			}
+			return strconv.Itoa(i) + ":" + strconv.Itoa(0)
+		}
+	}
+	return impossible
+}
+
+//ConvertResult convert result to string
+func ConvertResult(goal, result int) {
+
+}
+
+//Try is return position of vietnam after add goal
+func Try(goal, lose int) bool {
 	var indexOfVN int
-
-	k := GetVNGoal()
-	result += k
-	finalCompetitor := FindCompetitor()
-	team[FindByName(VN, &indexOfVN)].goal += k
-	team[finalCompetitor].lose += k
-	ShortTeams()
-}
-
-//GetVNGoal return VN goal to get 2nd
-func GetVNGoal() int {
-	var (
-		indexOfVN, finalCompetitor int
-	)
-
-	ShortTeams()
 	indexOfVN = FindByName(VN, &indexOfVN)
-	finalCompetitor = FindCompetitor()
+	indexOfOP := FindCompetitor()
 
-	vnTeam := &team[indexOfVN]
-	opTeam := &team[finalCompetitor]
-	team2dn := &team[1]
+	team[indexOfVN].goal += goal
+	team[indexOfVN].lose += lose
 
-	space := (team2dn.goal - team2dn.lose) - (vnTeam.goal - vnTeam.lose)
-	if space == 0 {
-		return 1
+	team[indexOfOP].goal += lose
+	team[indexOfOP].lose += goal
+
+	SortTeams()
+	/*fmt.Println("-------------")
+	fmt.Println(strconv.Itoa(goal) + "-" + strconv.Itoa(lose))
+	for i := 0; i < quantityOfTeam; i++ {
+		fmt.Println(team[i])
+	}*/
+
+	indexOfVN = FindByName(VN, &indexOfVN)
+	indexOfOP = FindCompetitor()
+	team[indexOfVN].goal -= goal
+	team[indexOfVN].lose -= lose
+
+	team[indexOfOP].goal -= lose
+	team[indexOfOP].lose -= goal
+	if indexOfVN < 2 {
+		return true
 	}
-
-	//fmt.Println(space)
-
-	if finalCompetitor == 1 {
-		var k int
-		k = (space + 1) / 2
-
-		if VN > opTeam.name && space%2 == 0 {
-			k++
-		}
-		return k
-	} else {
-		if team[1].goal-vnTeam.goal > space || (team[1].goal-vnTeam.goal == space && team[1].name < vnTeam.name) {
-			return space + 1
-		} else {
-			return space
-		}
-	}
+	return false
 }
 
 //IsHighPosition return true if > and false if <
@@ -132,8 +131,8 @@ func (own Team) IsHighPosition(team Team) bool {
 	return own.name < team.name
 }
 
-//ShortTeams sort team from high to low
-func ShortTeams() {
+//SortTeams sort team from high to low
+func SortTeams() {
 	for i := 0; i < quantityOfTeam-1; i++ {
 		for j := i + 1; j < quantityOfTeam; j++ {
 			if team[j].IsHighPosition(team[i]) {
@@ -144,9 +143,6 @@ func ShortTeams() {
 		}
 	}
 
-	/*for i := 0; i < quantityOfTeam; i++ {
-		fmt.Println(team[i])
-	}*/
 }
 
 //ReadData read data from console
